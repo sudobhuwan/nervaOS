@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=NervaOS
+Comment=AI-powered system assistant
+Exec=nerva-ui
+Icon=system-search-symbolic
+Terminal=false
+Type=Application
+Categories=Utility;System;
+Keywords=AI;Assistant;System;
+StartupNotify=true
+StartupWMClass=com.nervaos.ui

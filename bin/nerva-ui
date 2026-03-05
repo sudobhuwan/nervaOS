@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# NervaOS UI Launcher
+
+# Resolve the actual script path (handles symlinks)
+SCRIPT_FILE="${BASH_SOURCE[0]}"
+if [ -L "$SCRIPT_FILE" ]; then
+    SCRIPT_FILE="$(readlink -f "$SCRIPT_FILE")"
+fi
+SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_FILE")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+VENV_PATH="$HOME/.local/share/nervaos/venv"
+
+# Activate virtual environment
+if [ -f "$VENV_PATH/bin/activate" ]; then
+    source "$VENV_PATH/bin/activate"
+else
+    echo "Error: Virtual environment not found at $VENV_PATH"
+    echo "Please run install.sh first."
+    exit 1
+fi
+
+# Set PYTHONPATH and run the UI
+export PYTHONPATH="$PROJECT_ROOT:$PYTHONPATH"
+cd "$PROJECT_ROOT"
+exec python -m src.ui.main "$@"

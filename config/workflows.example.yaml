@@ -1,0 +1,249 @@
+# NervaOS Workflow Examples
+# Copy to ~/.config/nervaos/automation/workflows.yaml to use
+
+workflows:
+  # ══════════════════════════════════════════════════════════════════
+  # TIME-BASED WORKFLOWS
+  # ══════════════════════════════════════════════════════════════════
+  
+  - name: "Morning Development Routine"
+    description: "Start my dev environment every weekday at 9 AM"
+    enabled: true
+    trigger:
+      type: "weekday"
+      condition:
+        days: "Mon-Fri"
+        time: "09:00"
+    actions:
+      - type: "open"
+        params:
+          app: "code ~/Projects/main-project"
+      - type: "open"
+        params:
+          app: "google-chrome --new-window https://github.com"
+      - type: "execute"
+        params:
+          command: "docker-compose up -d"
+      - type: "notify"
+        params:
+          message: "☕ Good morning! Your dev environment is ready."
+
+  - name: "Daily Standup Reminder"
+    description: "Remind me about daily standup"
+    enabled: true
+    trigger:
+      type: "weekday"
+      condition:
+        days: "Mon-Fri"
+        time: "10:00"
+    actions:
+      - type: "notify"
+        params:
+          message: "🗣️ Daily standup in 15 minutes!"
+      - type: "open"
+        params:
+          app: "google-chrome https://meet.google.com/your-standup-link"
+
+  - name: "Evening Shutdown"
+    description: "Close work apps and remind me to take a break"
+    enabled: false  # Disabled by default
+    trigger:
+      type: "time"
+      condition:
+        time: "18:00"
+    actions:
+      - type: "close"
+        params:
+          app: "code"
+      - type: "close"
+        params:
+          app: "slack"
+      - type: "notify"
+        params:
+          message: "🌅 Work day done! Time to relax."
+
+  # ══════════════════════════════════════════════════════════════════
+  # EVENT-BASED WORKFLOWS (System Conditions)
+  # ══════════════════════════════════════════════════════════════════
+
+  - name: "High Memory Alert & Fix"
+    description: "When RAM > 90%, identify culprit and suggest fix"
+    enabled: true
+    trigger:
+      type: "event"
+      condition:
+        metric: "ram_percent"
+        operator: ">"
+        value: 90
+    actions:
+      - type: "ask_ai"
+        params:
+          query: "My RAM is at 90%. What's using the most memory and how can I fix it?"
+
+  - name: "Battery Saver Mode"
+    description: "Auto-optimize when battery is low"
+    enabled: true
+    trigger:
+      type: "battery"
+      condition:
+        level: 20
+    actions:
+      - type: "execute"
+        params:
+          command: "brightnessctl set 30%"
+      - type: "close"
+        params:
+          app: "spotify"
+      - type: "notify"
+        params:
+          message: "🔋 Battery saver activated. Brightness reduced, music stopped."
+
+  - name: "Disk Space Cleaner"
+    description: "When disk > 90%, offer to clean"
+    enabled: true
+    trigger:
+      type: "event"
+      condition:
+        metric: "disk_percent"
+        operator: ">"
+        value: 90
+    actions:
+      - type: "notify"
+        params:
+          message: "💾 Disk space critical! I can clean cache and temp files."
+      - type: "ask_ai"
+        params:
+          query: "My disk is 90% full. What's taking up space and what can I safely delete?"
+
+  # ══════════════════════════════════════════════════════════════════
+  # FILE-BASED WORKFLOWS
+  # ══════════════════════════════════════════════════════════════════
+
+  - name: "Auto-Organize Downloads"
+    description: "Organize Downloads folder when it has >50 files"
+    enabled: true
+    trigger:
+      type: "file_count"
+      condition:
+        path: "~/Downloads"
+        count: 50
+    actions:
+      - type: "organize"
+        params:
+          path: "~/Downloads"
+      - type: "notify"
+        params:
+          message: "🗂️ Organized your Downloads folder into categories!"
+
+  - name: "Weekly Screenshots Backup"
+    description: "Backup screenshots every Sunday"
+    enabled: false
+    trigger:
+      type: "weekday"
+      condition:
+        days: "Sun"
+        time: "20:00"
+    actions:
+      - type: "execute"
+        params:
+          command: "rsync -av ~/Pictures/Screenshots/ ~/Backups/Screenshots-$(date +%Y%m%d)/"
+      - type: "notify"
+        params:
+          message: "📸 Screenshots backed up!"
+
+  # ══════════════════════════════════════════════════════════════════
+  # APP-LAUNCH WORKFLOWS
+  # ══════════════════════════════════════════════════════════════════
+
+  - name: "Gaming Mode"
+    description: "When Steam opens, optimize system"
+    enabled: true
+    trigger:
+      type: "app_launch"
+      condition:
+        app: "steam"
+    actions:
+      - type: "close"
+        params:
+          app: "chrome"
+      - type: "close"
+        params:
+          app: "code"
+      - type: "notify"
+        params:
+          message: "🎮 Gaming mode activated! Closed background apps."
+
+  - name: "Developer Context"
+    description: "When VS Code opens, prepare dev environment"
+    enabled: false
+    trigger:
+      type: "app_launch"
+      condition:
+        app: "code"
+    actions:
+      - type: "execute"
+        params:
+          command: "docker ps"  # Check if containers are running
+      - type: "suggest"
+        params:
+          suggestion: "💡 Start your Docker containers? Type 'docker-compose up -d'"
+
+  # ══════════════════════════════════════════════════════════════════
+  # PROACTIVE ASSISTANCE
+  # ══════════════════════════════════════════════════════════════════
+
+  - name: "Friday Reminder"
+    description: "Weekly summary and backup reminder"
+    enabled: true
+    trigger:
+      type: "weekday"
+      condition:
+        days: "Fri"
+        time: "16:00"
+    actions:
+      - type: "ask_ai"
+        params:
+          query: "It's Friday afternoon. Summarize this week's work and remind me to backup important files."
+
+  - name: "Meeting Prep Helper"
+    description: "Before typical meeting time, check calendar"
+    enabled: false
+    trigger:
+      type: "time"
+      condition:
+        time: "09:45"  # 15 minutes before 10am meeting
+    actions:
+      - type: "suggest"
+        params:
+          suggestion: "📅 You have a meeting in 15 minutes. Need me to open your calendar or prep materials?"
+
+# ══════════════════════════════════════════════════════════════════
+# NOTES & TIPS
+# ══════════════════════════════════════════════════════════════════
+
+# Trigger Types:
+#   - time: Run at specific time (HH:MM format)
+#   - weekday: Run on specific days + time
+#   - event: Run when system metric matches condition
+#   - file_count: Run when folder has X files
+#   - battery: Run when battery level matches
+#   - app_launch: Run when specific app opens
+#   - pattern: Auto-created from learned behavior
+
+# Action Types:
+#   - open: Launch an application
+#   - execute: Run a safe command
+#   - close: Close an application
+#   - organize: Organize a folder by file type
+#   - notify: Send a notification
+#   - ask_ai: Ask AI a question
+#   - suggest: Show a proactive suggestion
+
+# Variables you can use:
+#   - ~/  expands to your home directory
+#   - $(date +%Y%m%d) for timestamps
+
+# Safety:
+#   - All actions respect the safety blacklist
+#   - Commands are validated before execution
+#   - File operations create automatic backups

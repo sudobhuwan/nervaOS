@@ -1,0 +1,21 @@
+[Unit]
+Description=NervaOS Intelligence Daemon
+Documentation=https://github.com/nervaos/nervaos
+After=graphical-session.target dbus.service
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+WorkingDirectory=%P
+ExecStart=%h/.local/share/nervaos/venv/bin/python -m src.core.service
+Restart=on-failure
+RestartSec=5
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/%U/bus
+Environment=PYTHONPATH=%P
+
+# Resource limits
+MemoryMax=200M
+CPUQuota=50%
+
+[Install]
+WantedBy=default.target

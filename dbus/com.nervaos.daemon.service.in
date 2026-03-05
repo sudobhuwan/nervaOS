@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=com.nervaos.daemon
+Exec=@BIN_DIR@/nerva-daemon
